@@ -139,6 +139,7 @@
 #include "MrsvrRAS.h"
 //#include "MrsvrTransform.h"
 #include "shmKeys.h"
+#include "galilMRSVR.h"
 
 using namespace std;
 
@@ -262,6 +263,8 @@ static int   fOutOfRange[NUM_ENCODERS];
 // Out of Range flag
 //static int   fOutOfRange[NUM_ENCODERS];
 
+//Galil controller handle
+galilMRSVR DMC("192.168.1.100");
 
 //===========================================================================
 // Constants
@@ -292,6 +295,7 @@ int  trapCtrl(MrsvrVector, float);
 int  trapCtrl2(MrsvrVector, float);
 void getActuatorTarget(MrsvrVector& target, MrsvrVector setPoint);
 int  updateEncoderCalibration();
+void galilMoveActuator();
 
 inline void printDate()
 {
@@ -610,7 +614,8 @@ inline int procActive(int init)
   for (int i = 0; i < NUM_ACTUATORS; i ++) {
     spim[i] = command->getSetPoint(i);
   }
-
+  cout<<"in process active loop"<<endl;
+  galilMoveActuator();
   //getActuatorTarget(sprb, spim);
   if (trapCtrl(spim, dev->getVmax(0)) <= 0) {
     status->setReached(1);
@@ -969,6 +974,40 @@ int updateEncoderCalibration()
   }
 }
 
+void galilMoveActuator()
+{
+  //Read the setpoint, 
+  MrsvrVector actCmd;
+  for (int i=0; i<NUM_ACTUATORS; i++)
+    {
+      actCmd[i] = command->getSetPoint(i);
+    }
+  //read foot pedal
+  cout<<"reading foot pedal ....."<<DMC.ReadFootPedal()<<endl;
+  //command the motors
+try{
+  DMC.MoveAxes(actCmd[0], actCmd[1]);
+  DMC.WaitMotion();
+  }
+  catch(string e)
+    {
+      cout<<e;
+    }
+ double xPos = DMC.GetPositionX();
+ cout<<"Reading Encoders from Galil---- "<<xPos<<endl;
+ status->setPosition(0, xPos);
+ status->setFootSwitch(!DMC.ReadFootPedal());
+ bool fpstat = 1;
+ for(int c=0; c<100; c++)
+   {
+     //cout<<"sleep before ......"<<fpstat<<endl;
+     //status->setFootSwitch(fpstat);
+     //sleep(1);
+     //cout<<"sleep after ......"<<fpstat<<endl;
+     if(c%2 == 0)
+       fpstat= !fpstat;
+   }
+}
 
 //===========================================================================
 // Main
@@ -980,6 +1019,16 @@ int main(int argc, char* argv[])
   struct tm ctm;
   static bool prevLockState[NUM_ACTUATORS];
   static bool prevActiveState[NUM_ACTUATORS];
+
+  try{
+    //DMC = galilMRSVR("170.223.221.245");
+    DMC.InitMotor();
+    DMC.EnableMotorPower();
+  }
+  catch(string e)
+    {
+      cout<<e;
+    }
 
   logging = 0;
 

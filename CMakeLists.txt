@@ -14,6 +14,7 @@ option(BUILD_SHARED "Build Shared Libraries" OFF)
 option(USE_FBISIM   "Use FBISIM Libraries" ON)
 option(USE_ARTAPI   "Use ARTLinux API" ON)
 option(FULL_SCREEN  "Build for full screen program" OFF)
+option(USE_GALIL "Use Galil library" ON)
 SET(FOX_LIBNAME "FOX-1.2" CACHE STRING "FOX Toolkit library name")
 
 
@@ -60,6 +61,10 @@ find_path(FOX_LINK_DIR
    PATH  /opt/local/lib
 )
 
+find_path(GALIL_LINK_DIR
+  NAMES Galil
+  PATH /usr/lib
+)
 
 # --------------------------------------------------------------------------
 # Include dirs
@@ -89,6 +94,7 @@ include_directories(
 link_directories (
   ${CMAKE_CURRENT_BINARY_DIR}
   ${FOX_LINK_DIR}
+  ${GALIL_LINK_DIR}
 )
 
 
@@ -109,6 +115,7 @@ set(COMOBJ_SOURCES
   MrsvrCommand.cpp
   MrsvrLog.cpp
   MrsvrRAS.cpp
+  galilMRSVR.cpp
 )
 
 set(IFOBJ_SOURCES
@@ -239,6 +246,7 @@ set (CTRL_LIBS
   MrsvrCom
   MrsvrCtrl
   m
+  Galil
 )  
 
 if (USE_FBISIM)
