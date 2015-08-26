@@ -53,7 +53,7 @@ www.fox-toolkit.org/download.html
 tar -xvzf fox-1.6.50.tar.gz
 ```
 
-#### (2). Configure: 
+#### (2). Configuration: 
 ```
 cd fox-1.6.50
 sudo ./configure
@@ -94,7 +94,7 @@ sudo make install
 ```
 
 ### 8. SNRMRRobot controller 
-#### (0). Download the source code
+#### (0). Clone the source code using Git
 ```
 git clone https://github.com/SNRLab/SNRMRRobotController.git
 ```
@@ -117,7 +117,7 @@ cd ../SNRMRRobotController-build
 ccmake ../SNRMRRobotController
 ```
 
-###### There are several parameters need to change here:
+###### !!! There are several parameters need to change here:
 (a). OpenIGTLink_DIR: add the path where you make the OpenIGTLink library (e.g:/home/SNR/OpenIGTLink-build) <br>
 (b). USE_ARTAPT:OFF<br>
 (c). FOX_INCLUDE_DIR:/usr/local/include/fox-1.6.50<br>
