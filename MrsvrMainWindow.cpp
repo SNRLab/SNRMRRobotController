@@ -187,7 +187,6 @@ MrsvrMainWindow::MrsvrMainWindow(FXApp* app, int w, int h)
   robotStatus = NULL;
   robotCommand = NULL; 
   robotLog = NULL;
-  extMsgSvr = NULL;
   transform = NULL;
 
   infoCanvas = NULL;
@@ -1697,9 +1696,39 @@ void MrsvrMainWindow::updateExternalCommands()
       strcpy(infoRegistTime, infoTime);
       fUpdateInfoRegistTime = 1;
       infoRegistTimeWarning = false;
+     
+      if (fUpdateInfoRegistTime == 1) {
+	extMsgSvr->feedBackInfoRegist(infoRegistTime);
+      }
+
     }
   }
 }
+
+
+//-------------------------------------------------- july6,ez
+int cTimes = 0;
+int wTimes = 0;
+int eTimes = 0;
+
+void MrsvrMainWindow::updateFeedBackInfo()
+{
+  if (extMsgSvr != NULL) 
+    {  // Message Server
+      if (extMsgSvr->getSvrStatus() == MrsvrMessageServer::SVR_CONNECTED) {
+	//std::cerr << "connect: "<< cTimes++ << std::endl;
+	extMsgSvr->feedBackInfo();
+      }
+      else if (extMsgSvr->getSvrStatus() == MrsvrMessageServer::SVR_WAIT) {
+	//std::cerr << "wait: " << wTimes++ << std::endl;
+	//extMsgSvr->feedBackInfo();
+      }
+      else {
+	//std::cerr << "else: " << eTimes++ << std::endl;
+      }
+    }
+}
+//-------------------------------------------------- end july6,ez
 
 
 void MrsvrMainWindow::setTargetPositionRAS(float pos[3])
@@ -2188,6 +2217,9 @@ long MrsvrMainWindow::onUpdateTimer(FXObject* obj, FXSelector sel,void* ptr)
 
   updateParameters();
   updateExternalCommands();
+  //-------------------------------------------------- july6,ez
+  updateFeedBackInfo();
+  //-------------------------------------------------- end july6,ez
 
   int currentMode = robotStatus->getMode();
   if (prevMode != currentMode) {
@@ -2281,6 +2313,7 @@ long MrsvrMainWindow::onUpdateTimer(FXObject* obj, FXSelector sel,void* ptr)
   for (i = 0; i < 3; i ++) {
     robotP[i] = robotCommand->getSetPoint(i);
   }
+
   transform->invTransform(robotP, mrP);
   for (i = 0; i < 3; i ++) {
     tp[i] = mrP[i];

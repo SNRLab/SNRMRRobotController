@@ -62,6 +62,9 @@
 #include "igtlServerSocket.h"
 #include "igtlSocket.h"
 
+#include "igtlPointMessage.h"
+#include "igtlStringMessage.h"
+
 /*
 #include "MrsvrLogicalPosition.h"
 #include "MrsvrPhysicalPosition.h"
@@ -117,6 +120,13 @@ class MrsvrMessageServer : public MrsvrThread {
   //unsigned char      rcvBuf[MESSAGE_BUFFER_SIZE];
   int                onRcvMsgMaster(igtl::Socket::Pointer& socket, igtl::MessageHeader::Pointer& header);
 
+//-------------------- july9,ez
+  int                onRcvPointMsg(igtl::Socket::Pointer& socket, igtl::MessageHeader::Pointer& header);
+  int                onRcvStringMsg(igtl::Socket::Pointer& socket, igtl::MessageHeader::Pointer& header);
+//-------------------- end july9, ez
+
+
+
   bool               fSetTargetMatrix;
   bool               fSetCalibrationMatrix;
 
@@ -145,6 +155,22 @@ class MrsvrMessageServer : public MrsvrThread {
 
   igtl::Socket* getSocket() { return this->socket; };
   int         sendCurrentPosition(igtl::Matrix4x4& current);
+
+
+//-------------------------------------------------------------------- july6,ez
+  //void        feedBackStatus(int status);
+  int         feedBackInfoRegist(char* infoRegistTime);
+  int         feedBackInfoTargetCell(char* cStringPos);
+  int         feedBackInfo();
+  bool        fZFrameTransform;
+  bool        fTarget;
+  bool        fTargetCell;
+  bool        fConnect;
+
+//char*       cString;
+  char*       stringToken;
+  double      stringPos[3];
+//-------------------------------------------------------------------- end july6,ez
 
  private:
   int         setTargetMatrix(igtl::Matrix4x4& matrix);

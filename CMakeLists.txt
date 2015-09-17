@@ -12,9 +12,9 @@ INCLUDE (CheckIncludeFiles)
 
 option(BUILD_SHARED "Build Shared Libraries" OFF)
 option(USE_FBISIM   "Use FBISIM Libraries" ON)
-option(USE_ARTAPI   "Use ARTLinux API" ON)
+option(USE_ARTAPI   "Use ARTLinux API" OFF)
 option(FULL_SCREEN  "Build for full screen program" OFF)
-SET(FOX_LIBNAME "FOX-1.2" CACHE STRING "FOX Toolkit library name")
+SET(FOX_LIBNAME "FOX-1.6" CACHE STRING "FOX Toolkit library name")
 
 
 ADD_DEFINITIONS(-DHAVE_JPEG_H=1)

@@ -605,6 +605,11 @@ private:
   void   setTargetPositionRAS(float[3]);
   void   setCalibrationMatrix(float[16]);
 
+
+  //-------------------------------------------------- july6,ez
+  void   updateFeedBackInfo();
+  //-------------------------------------------------- end july6,ez
+
 //----------------------- Public functions -------------------------//
 public:
   virtual void create();
