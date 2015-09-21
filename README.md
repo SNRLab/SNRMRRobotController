@@ -135,6 +135,6 @@ make
 
 ### 9. Then if you could see the interface which looks like the figure below
 
-![](https://github.com/ytzhao/RobotController/blob/master/Image/interfce.jpg)
+![](https://github.com/SNRLab/SNRMRRobotController/blob/smart-template/Image/interfce.jpg)
 
 ###  :beers: :beers: :beers: Congratulation!!! You've already set up the develop environment for this project
