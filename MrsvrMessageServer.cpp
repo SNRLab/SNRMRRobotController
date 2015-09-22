@@ -380,8 +380,25 @@ int MrsvrMessageServer::onRcvStringMsg(igtl::Socket::Pointer& socket, igtl::Mess
       if (fTargetCell == true){
 	feedBackInfoTargetCell(cStringPos);
       }
+    }  // end "TARGETCell" if
       
-    }
+      
+    if (strcmp(stringMsg->GetDeviceName(), "SelectPath") == 0){
+        //std::cerr << "String: " << stringMsg->GetString() << std::endl;
+        
+        char *cStringPath = new char[std::strlen(stringMsg->GetString())+1];
+        std::strcpy(cStringPath, stringMsg->GetString());
+        stringTokenPath = std::strtok(cStringPath, ",");
+          
+        for(int i = 0; i < 4; i++)
+        {
+            //std::cerr << stringToken << std::endl;
+            stringPath[i] = std::atof(stringTokenPath);
+            std::cerr << "stringPath: " << stringPath[i] <<std::endl;
+            stringToken = strtok(NULL,",");
+        }
+      }  // end "SelectPath" else if
+    
   }
   return 1;
 }

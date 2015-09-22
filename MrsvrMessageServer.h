@@ -120,10 +120,10 @@ class MrsvrMessageServer : public MrsvrThread {
   //unsigned char      rcvBuf[MESSAGE_BUFFER_SIZE];
   int                onRcvMsgMaster(igtl::Socket::Pointer& socket, igtl::MessageHeader::Pointer& header);
 
-//-------------------- july9,ez
+//-------------------- july9,yz
   int                onRcvPointMsg(igtl::Socket::Pointer& socket, igtl::MessageHeader::Pointer& header);
   int                onRcvStringMsg(igtl::Socket::Pointer& socket, igtl::MessageHeader::Pointer& header);
-//-------------------- end july9, ez
+//-------------------- end july9, yz
 
 
 
@@ -157,7 +157,7 @@ class MrsvrMessageServer : public MrsvrThread {
   int         sendCurrentPosition(igtl::Matrix4x4& current);
 
 
-//-------------------------------------------------------------------- july6,ez
+//-------------------------------------------------------------------- july6,yz
   //void        feedBackStatus(int status);
   int         feedBackInfoRegist(char* infoRegistTime);
   int         feedBackInfoTargetCell(char* cStringPos);
@@ -170,7 +170,7 @@ class MrsvrMessageServer : public MrsvrThread {
 //char*       cString;
   char*       stringToken;
   double      stringPos[3];
-//-------------------------------------------------------------------- end july6,ez
+//-------------------------------------------------------------------- end july6,yz
 
  private:
   int         setTargetMatrix(igtl::Matrix4x4& matrix);
