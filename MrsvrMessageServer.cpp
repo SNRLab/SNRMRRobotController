@@ -24,7 +24,11 @@
 #include <math.h>
 #include <cstdlib>
 #include <cstring>
+#include <map>
 
+
+std::map <int, string>    rowCoor;
+std::map <int, string>    colCoor;
 
 const char* MrsvrMessageServer::svrStatusStr[] = {
   "Sleeping",
@@ -84,8 +88,43 @@ void printTargetMatrix(igtl::Matrix4x4& matrix){
 MrsvrMessageServer::MrsvrMessageServer(int port) : MrsvrThread()
 {
   this->port = port;
+  this->gapDist = 8.95;
   init();
   pthread_mutex_init(&mtxCommand, NULL);
+
+
+  //TODO: Change the rowCoor&colCoor according to which template chosen (oldSmartTemplate or newSmartTemplate)  
+  rowCoor[1] = "A";
+  rowCoor[2] = "B";
+  rowCoor[3] = "C";
+  rowCoor[4] = "D";
+  rowCoor[5] = "E";
+  rowCoor[6] = "F";
+  rowCoor[7] = "G";
+  rowCoor[8] = "H";
+  rowCoor[9] = "I";
+  rowCoor[10] = "J";
+  rowCoor[11] = "K";
+  rowCoor[12] = "L";
+  rowCoor[13] = "M";
+  rowCoor[14] = "N";
+
+
+  colCoor[-7] = "-7";
+  colCoor[-6] = "-6";
+  colCoor[-5] = "-5";
+  colCoor[-4] = "-4";
+  colCoor[-3] = "-3";
+  colCoor[-2] = "-2";
+  colCoor[-1] = "-1";
+  colCoor[0] = "0";
+  colCoor[1] = "1";
+  colCoor[2] = "2";
+  colCoor[3] = "3";
+  colCoor[4] = "4";
+  colCoor[5] = "5";
+  colCoor[6] = "6";
+  colCoor[7] = "7";
 }
 
 
@@ -189,8 +228,12 @@ void MrsvrMessageServer::process()
 	  feedBackInfo();
 	}
 
-	else if (strcmp(headerMsg->GetDeviceType(), "STRING") == 0){
-	  onRcvStringMsg(socket, headerMsg);
+	else if ((strcmp(headerMsg->GetDeviceType(), "STRING") == 0) && (strcmp(headerMsg->GetDeviceName(), "TARGETCell") == 0)){
+	  onRcvStringMsgTargetCell(socket, headerMsg);
+	}
+
+	else if ((strcmp(headerMsg->GetDeviceType(), "STRING") == 0) && (strcmp(headerMsg->GetDeviceName(), "SelectPath") == 0)){
+	  onRcvStringMsgSelectPath(socket, headerMsg);
 	}
 	
 	else{
@@ -315,7 +358,8 @@ int MrsvrMessageServer::onRcvPointMsg(igtl::Socket::Pointer& socket, igtl::Messa
 	  pointElement->GetPosition(pos);
 	  
 	  std::cerr << "Name: " << pointElement->GetName() << std::endl;
-          std::cerr << " Position  : ( " << std::fixed << pos[0] << ", " << pos[1] << ", " << pos[2] << " )" << std::endl;
+          //std::cerr << " Position  : ( " << std::fixed << pos[0] << ", " << pos[1] << ", " << pos[2] << " )" << std::endl;
+	  std::cerr << " Position  : ( "  << pos[0] << ", " << pos[1] << ", " << pos[2] << " )" << std::endl;
 	}
       fTarget = true;
     }
@@ -325,10 +369,10 @@ int MrsvrMessageServer::onRcvPointMsg(igtl::Socket::Pointer& socket, igtl::Messa
 
 
 
-int MrsvrMessageServer::onRcvStringMsg(igtl::Socket::Pointer& socket, igtl::MessageHeader::Pointer& header)
+int MrsvrMessageServer::onRcvStringMsgTargetCell(igtl::Socket::Pointer& socket, igtl::MessageHeader::Pointer& header)
 {
 #ifdef DEBUG_MRSVR_MESSAGE_SERVER
-  fprintf(stderr, "MrsvrMessageServer::onRcvStringMsg():Receiving STRING data type.\n");
+  fprintf(stderr, "MrsvrMessageServer::onRcvStringMsgTargetCell():Receiving STRING data type.\n");
 #endif
   
   igtl::StringMessage::Pointer stringMsg;
@@ -347,62 +391,184 @@ int MrsvrMessageServer::onRcvStringMsg(igtl::Socket::Pointer& socket, igtl::Mess
       char *cStringPos = new char[std::strlen(stringMsg->GetString())+1];
       std::strcpy(cStringPos, stringMsg->GetString());
       stringToken = std::strtok(cStringPos, ",");
-             
-      for(int i = 0; i < 3; i++)
+       
+      for (int i = 0; i < 13; i++)
       {
 	//std::cerr << stringToken << std::endl;	
 	stringPos[i] = std::atof(stringToken);
-	std::cerr << "stringPos: " << stringPos[i] <<std::endl;
+	//	std::cerr << "stringPos: " << stringPos[i] << ", i: " << i << std::endl;
 	stringToken = strtok(NULL,",");
       }
-        
+
+      for (int i = 0; i < 3; i++)
+      {
+	targetRAS[i] = stringPos[i];
+	templatePlane[i] = stringPos[i+3];
+	holeRAS[i] = stringPos[i+6];
+      }
+      
+      depthAngulated = stringPos[9];
+      degreeAngulated = stringPos[10];
+      rowAngulated = int(stringPos[11]);
+      colAngulated = int(stringPos[12]);
+
+      std::cerr << "targetRAS: " << targetRAS[0] << ", " << targetRAS[1] << ", " << targetRAS[2] << std::endl;
+      std::cerr << "tempplatePlane: " << templatePlane[0] << ", " << templatePlane[1] << ", " << templatePlane[2] << std::endl;
+      std::cerr << "holeRAS: " << holeRAS[0] << ", " << holeRAS[1] << ", " << holeRAS[2] << std::endl;
+      std::cerr << "depth: " << depthAngulated << std::endl;
+      std::cerr << "degree: " << degreeAngulated << std::endl;
+      //std::cerr << "(x,y): "<< rowAngulated << ", " << colAngulated << std::endl; 
+      std::cerr << "x = " << rowCoor[rowAngulated] << std::endl;
+      std::cerr << "y = " << colCoor[colAngulated] << std::endl;
+
+      // insertionLocation = determineInsertionLocation(targetRAS, templatePlane, holeRAS, gapDist);
+      //std::cerr << "insertionLocation: " << insertionLocation[0] << ", " << insertionLocation[1] << ", " << insertionLocation[2] << std::endl;
+      insertionLocation2 = determineXYZ(targetRAS, holeRAS, gapDist);
+      std::cerr << "insertionLocation2: " << insertionLocation2[0] << ", " << insertionLocation2[1] << ", " << insertionLocation2[2] << std::endl;
+
+      std::cerr << "!!!!!! TEST" << std::endl;
+      float deltaX = gapDist*tan(stringPos[10] * PI/180.0);
+      float theoX =  sqrt(pow((insertionLocation2[0]-holeRAS[0]),2) + pow((insertionLocation2[1]-holeRAS[1]),2));
+      float ratioX = (insertionLocation2[0]-holeRAS[0]) / (float)(holeRAS[0]-targetRAS[0]);
+      float ratioY = (insertionLocation2[1]-holeRAS[1]) / (float)(holeRAS[1]-targetRAS[1]);
+      float ratioZ = (insertionLocation2[2]-holeRAS[2]) / (float)(holeRAS[2]-targetRAS[2]);
+      std::cerr << "deltaX: " << deltaX << std::endl;
+      std::cerr << "theoX: " << theoX << std::endl;
+      std::cerr << "ratioX: " << ratioX << std::endl;
+      std::cerr << "ratioY: " << ratioY << std::endl;
+      std::cerr << "ratioZ: " << ratioZ << std::endl;
+
+      
       pthread_mutex_lock(&mtxCommand);
         targetMatrix[0][0] = 1.0;
         targetMatrix[0][1] = 0.0;
         targetMatrix[0][2] = 0.0;
-        targetMatrix[0][3] = stringPos[0];
+        targetMatrix[0][3] = insertionLocation2[0];
         targetMatrix[1][0] = 0.0;
         targetMatrix[1][1] = 1.0;
         targetMatrix[1][2] = 0.0;
-        targetMatrix[1][3] = stringPos[1];
+        targetMatrix[1][3] = insertionLocation2[1];
         targetMatrix[2][0] = 0.0;
         targetMatrix[2][1] = 0.0;
         targetMatrix[2][2] = 1.0;
-        targetMatrix[2][3] = stringPos[2];
+        targetMatrix[2][3] = insertionLocation2[2];
         targetMatrix[3][0] = 0.0;
         targetMatrix[3][1] = 0.0;
         targetMatrix[3][2] = 0.0;
         targetMatrix[3][3] = 1.0;
       pthread_mutex_unlock(&mtxCommand);
+
+      // delete[] insertionLocation;
              
       fTargetCell = true;
       
       if (fTargetCell == true){
 	feedBackInfoTargetCell(cStringPos);
       }
-    }  // end "TARGETCell" if
-      
-      
-    if (strcmp(stringMsg->GetDeviceName(), "SelectPath") == 0){
-        //std::cerr << "String: " << stringMsg->GetString() << std::endl;
-        
-        char *cStringPath = new char[std::strlen(stringMsg->GetString())+1];
-        std::strcpy(cStringPath, stringMsg->GetString());
-        stringTokenPath = std::strtok(cStringPath, ",");
-          
-        for(int i = 0; i < 4; i++)
-        {
-            //std::cerr << stringToken << std::endl;
-            stringPath[i] = std::atof(stringTokenPath);
-            std::cerr << "stringPath: " << stringPath[i] <<std::endl;
-            stringToken = strtok(NULL,",");
-        }
-      }  // end "SelectPath" else if
+    } 
     
   }
   return 1;
 }
 
+
+
+//-------------------------------------------------- sep25,yz
+/*
+float* MrsvrMessageServer::determineInsertionLocation(float targetRAS[3], float templatePlane[3], float holeRAS[3], float gapDist)
+{
+  std::cerr << "MrsvrMessageServer::determineInsertionLocation()" << std::endl;
+  float  *returnResult = new float[3];
+  float  tR, tA, tS, vA, vB, vC, v1, v2, v3, n1, n2, n3, t, vpt;
+  
+  tR = targetRAS[0];
+  tA = targetRAS[1];
+  tS = targetRAS[2];
+  vA = templatePlane[0];
+  vB = templatePlane[1];
+  vC = templatePlane[2] - gapDist;
+  n1 = holeRAS[0];
+  n2 = holeRAS[1];
+  n3 = holeRAS[2];
+  v1 = n1 - tR;
+  v2 = n2 - tA;
+  v3 = n3 - tS;
+
+  vpt = vA*v1 + vB*v2 + vC*v3;
+ 
+  if (vpt == 0)
+  {
+    returnResult = NULL;
+  }
+  else
+  {
+    t = ((n1-tR)*vA + (n2-tA)*vB + (n3-tS)*vC) / vpt;
+    returnResult[0] = tR + v1*t;
+    returnResult[1] = tA + v2*t;
+    returnResult[2] = tS + v3*t;  
+  }
+
+  return returnResult;
+}
+*/
+
+float* MrsvrMessageServer::determineXYZ(float targetRAS[3], float holeRAS[3], float gapDist)
+{
+  float *returnLocation = new float[3];
+  float x, y, z, con;
+
+  z = holeRAS[2] - gapDist;
+  con = (z-holeRAS[2]) / (float)(holeRAS[2]-targetRAS[2]);
+
+  std::cerr << "con: " << con << std::endl;
+
+  x = con*(holeRAS[0]-targetRAS[0]) + holeRAS[0];
+  y = con*(holeRAS[1]-targetRAS[1]) + holeRAS[1];
+
+  returnLocation[0] = x;
+  returnLocation[1] = y;
+  returnLocation[2] = z;
+ 
+  return returnLocation; 
+}
+//-------------------------------------------------- end sep25,yz
+
+
+
+int MrsvrMessageServer::onRcvStringMsgSelectPath(igtl::Socket::Pointer& socket, igtl::MessageHeader::Pointer& header)
+{
+#ifdef DEBUG_MRSVR_MESSAGE_SERVER
+  fprintf(stderr, "MrsvrMessageServer::onRcvStringMsgSelectPath():Receiving STRING data type.\n");
+#endif
+  
+  igtl::StringMessage::Pointer stringMsg;
+  stringMsg = igtl::StringMessage::New();
+  stringMsg->SetMessageHeader(header);
+  stringMsg->AllocatePack();
+  
+  int rcv = socket->Receive(stringMsg->GetPackBodyPointer(), stringMsg->GetPackBodySize());
+  
+  int c = stringMsg->Unpack(1);
+  
+  if (c & igtl::MessageHeader::UNPACK_BODY) { 
+    if (strcmp(stringMsg->GetDeviceName(), "SelectPath") == 0){
+      
+      char *cStringPath = new char[std::strlen(stringMsg->GetString())+1];
+      std::strcpy(cStringPath, stringMsg->GetString());
+      stringTokenPath = std::strtok(cStringPath, ",");
+
+      for(int i = 0; i < 2; i++)
+      {
+	stringPath[i] = std::atof(stringTokenPath);
+	std::cerr << "stringPath: " << stringPath[i] << ", i: " << i <<std::endl;
+	stringTokenPath = strtok(NULL,",");
+      }
+
+    } 
+    
+  }
+  return 1;
+}
 //-------------------------------------------------- end july11,yz
 
 
@@ -465,8 +631,6 @@ int MrsvrMessageServer::feedBackInfo()
       fTarget = false;
     }
       
-
-
 //      igtl::TransformMessage::Pointer feedMsg;
 //      feedMsg = igtl::TransformMessage::New();
 //      igtl::TimeStamp::Pointer ts;
@@ -647,3 +811,112 @@ void MrsvrMessageServer::getRobotStatus(int* mode, int* outrange, int* lock)
   }
 }
 
+
+/*
+string MrsvrMessageServer::rowCoor(int rowAngulated)
+{
+  string row;
+  switch (rowAngulated){
+  case 1:  
+    row = "A"; 
+    break;
+  case 2:
+    row = "B";
+    break;
+  case 3:
+    row = "C";
+    break;
+  case 4:  
+    row = "D";
+    break;
+  case 5:
+    row = "E";
+    break;
+  case 6:
+    row = "F";
+    break;
+  case 7:  
+    row = "G";
+    break;
+  case 8:
+    row = "H";
+    break;
+  case 9:
+    row = "I";
+    break;
+  case 10:  
+    row = "J";
+    break;
+  case 11:
+    row = "K";
+    break;
+  case 12:
+    row = "L";
+    break;
+  case 13:
+    row = "M";
+    break;
+  case 14:
+    row = "N";
+    break;
+  }
+
+  return row;
+}
+
+
+
+string MrsvrMessageServer::colCoor(int colAngulated)
+{
+  string col;
+  switch (colAngulated){
+  case -7:  
+    col = "-7"; 
+    break;
+  case -6:
+    col = "-6";
+    break;
+  case -5:
+    col = "-5";
+    break;
+  case -4:  
+    col = "-4";
+    break;
+  case -3:
+    col = "-3";
+    break;
+  case -2:
+    col = "-2";
+    break;
+  case -1:  
+    col = "-1";
+    break;
+  case 0:
+    col = "0";
+    break;
+  case 1:
+    col = "1";
+    break;
+  case 2:  
+    col = "2";
+    break;
+  case 3:
+    col = "3";
+    break;
+  case 4:
+    col = "4";
+    break;
+  case 5:
+    col = "5";
+    break;
+  case 6:
+    col = "6";
+    break;
+  case 7:
+    col = "7";
+    break;
+  }
+
+  return col;
+}
+*/
