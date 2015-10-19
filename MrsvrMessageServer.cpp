@@ -456,6 +456,7 @@ int MrsvrMessageServer::onRcvStringMsgTargetCell(igtl::Socket::Pointer& socket, 
         targetMatrix[3][1] = 0.0;
         targetMatrix[3][2] = 0.0;
         targetMatrix[3][3] = 1.0;
+	fSetTargetMatrix = true;
       pthread_mutex_unlock(&mtxCommand);
 
       // delete[] insertionLocation;

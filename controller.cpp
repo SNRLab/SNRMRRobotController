@@ -663,7 +663,9 @@ int trapCtrl(MrsvrVector setPoint, float vmax)
   float newa, newv;
   int reach = 0;
 
-  if (dev->getSwitchStatus(0) == 0) {
+  // JT: Temporary change -- deactivate foot pdedal
+  //if (dev->getSwitchStatus(0) == 0) {
+  if (dev->getSwitchStatus(0) == 1) {
     for (int i = 0; i < NUM_ACTUATORS; i ++) {
       float dist  = setPoint[i] - curPos[i];
       if (fabs(dist) < TH_REACH_ERROR)  {

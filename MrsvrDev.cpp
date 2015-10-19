@@ -455,16 +455,17 @@ int MrsvrDev::setEncLimit(unsigned int enc, float min, float max)
 
 int MrsvrDev::getLimitSensorStatus(int i)
 {
-  DioInputWord(DEV_DIO, FBIDIO_IN1_16, &dioInValue);
-  if (((dioInStgHomeMsk[i]&dioInValue) && homeSensorDefault[i]) ||
-      (!(dioInStgHomeMsk[i]&dioInValue)) && !(homeSensorDefault[i])) {
-    return -1;
-  } else if (((dioInStgLmtMsk[i]&dioInValue) && limitSensorDefault[i]) ||
-             (!(dioInStgLmtMsk[i]&dioInValue) && !limitSensorDefault[i])) {
-    return 1;
-  } else {
-    return 0;
-  } 
+  // JT: Temporary change -- deactivate the limit switches
+  //DioInputWord(DEV_DIO, FBIDIO_IN1_16, &dioInValue);
+  //if (((dioInStgHomeMsk[i]&dioInValue) && homeSensorDefault[i]) ||
+  //    (!(dioInStgHomeMsk[i]&dioInValue)) && !(homeSensorDefault[i])) {
+  //  return -1;
+  //} else if (((dioInStgLmtMsk[i]&dioInValue) && limitSensorDefault[i]) ||
+  //           (!(dioInStgLmtMsk[i]&dioInValue) && !limitSensorDefault[i])) {
+  //  return 1;
+  //} else {
+  //  return 0;
+  //} 
   return 0;
 }
 
