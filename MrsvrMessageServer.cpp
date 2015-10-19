@@ -50,7 +50,7 @@ const char* MrsvrMessageServer::robotModeStr[] = {
 };
 
 
-//-------------------------------------------------- july6,yz
+//-------------------------------------------------- yuting
 void GetRandomMatrix(igtl::Matrix4x4& matrix){
   float position[3];
   float orientation[4];
@@ -83,7 +83,7 @@ void GetRandomMatrix(igtl::Matrix4x4& matrix){
 void printTargetMatrix(igtl::Matrix4x4& matrix){
   igtl::PrintMatrix(matrix);
 }
-//-------------------------------------------------- end july6,yz
+//-------------------------------------------------- end, yuting
 
 MrsvrMessageServer::MrsvrMessageServer(int port) : MrsvrThread()
 {
@@ -94,6 +94,7 @@ MrsvrMessageServer::MrsvrMessageServer(int port) : MrsvrThread()
 
 
   //TODO: Change the rowCoor&colCoor according to which template chosen (oldSmartTemplate or newSmartTemplate)  
+  /*
   rowCoor[1] = "A";
   rowCoor[2] = "B";
   rowCoor[3] = "C";
@@ -125,6 +126,7 @@ MrsvrMessageServer::MrsvrMessageServer(int port) : MrsvrThread()
   colCoor[5] = "5";
   colCoor[6] = "6";
   colCoor[7] = "7";
+  */
 }
 
 
@@ -145,11 +147,11 @@ void MrsvrMessageServer::init()
   nextRobotMode    = -1;
 
 
-  //-------------------------------------------------- july6,yz
+  //-------------------------------------------------- yuting
   fZFrameTransform = false;
   fTarget = false;
   fTargetCell = false;
-  //-------------------------------------------------- end july6,yz
+  //-------------------------------------------------- end, yuting
 
   this->connectionStatus =  SVR_STOP;
   this->fRunServer = 1;
@@ -215,7 +217,7 @@ void MrsvrMessageServer::process()
         // Deserialize the header
         headerMsg->Unpack();
 
-	//-------------------- july11,yz
+	//-------------------- yuting
 	std::cerr << "device type: " << headerMsg->GetDeviceType() << ", device name: " << headerMsg->GetDeviceName() << std::endl;
  
         // Check data type and receive data body
@@ -311,9 +313,9 @@ int MrsvrMessageServer::onRcvMsgMaster(igtl::Socket::Pointer& socket, igtl::Mess
     } else if (strcmp(transMsg->GetDeviceName(), "ZFrameTransform") == 0){
       
       setCalibrationMatrix(matrix);
-      //-------------------------------------------------- july6,yz
+      //-------------------------------------------------- yuting
       fZFrameTransform = true;
-      //-------------------------------------------------- end july6,yz
+      //-------------------------------------------------- end, yuting
     }
     
     return 1;
@@ -322,7 +324,7 @@ int MrsvrMessageServer::onRcvMsgMaster(igtl::Socket::Pointer& socket, igtl::Mess
 }
 
 
-//-------------------------------------------------- july11,yz
+//-------------------------------------------------- yuting
 int MrsvrMessageServer::onRcvPointMsg(igtl::Socket::Pointer& socket, igtl::MessageHeader::Pointer& header)
 {
 #ifdef DEBUG_MRSVR_MESSAGE_SERVER
@@ -473,45 +475,7 @@ int MrsvrMessageServer::onRcvStringMsgTargetCell(igtl::Socket::Pointer& socket, 
 
 
 
-//-------------------------------------------------- sep25,yz
-/*
-float* MrsvrMessageServer::determineInsertionLocation(float targetRAS[3], float templatePlane[3], float holeRAS[3], float gapDist)
-{
-  std::cerr << "MrsvrMessageServer::determineInsertionLocation()" << std::endl;
-  float  *returnResult = new float[3];
-  float  tR, tA, tS, vA, vB, vC, v1, v2, v3, n1, n2, n3, t, vpt;
-  
-  tR = targetRAS[0];
-  tA = targetRAS[1];
-  tS = targetRAS[2];
-  vA = templatePlane[0];
-  vB = templatePlane[1];
-  vC = templatePlane[2] - gapDist;
-  n1 = holeRAS[0];
-  n2 = holeRAS[1];
-  n3 = holeRAS[2];
-  v1 = n1 - tR;
-  v2 = n2 - tA;
-  v3 = n3 - tS;
-
-  vpt = vA*v1 + vB*v2 + vC*v3;
- 
-  if (vpt == 0)
-  {
-    returnResult = NULL;
-  }
-  else
-  {
-    t = ((n1-tR)*vA + (n2-tA)*vB + (n3-tS)*vC) / vpt;
-    returnResult[0] = tR + v1*t;
-    returnResult[1] = tA + v2*t;
-    returnResult[2] = tS + v3*t;  
-  }
-
-  return returnResult;
-}
-*/
-
+//-------------------------------------------------- sep25, yuting
 float* MrsvrMessageServer::determineXYZ(float targetRAS[3], float holeRAS[3], float gapDist)
 {
   float *returnLocation = new float[3];
@@ -531,7 +495,7 @@ float* MrsvrMessageServer::determineXYZ(float targetRAS[3], float holeRAS[3], fl
  
   return returnLocation; 
 }
-//-------------------------------------------------- end sep25,yz
+//-------------------------------------------------- end, yuting
 
 
 
@@ -569,10 +533,10 @@ int MrsvrMessageServer::onRcvStringMsgSelectPath(igtl::Socket::Pointer& socket, 
   }
   return 1;
 }
-//-------------------------------------------------- end july11,yz
+//-------------------------------------------------- end, yuting
 
 
-//-------------------------------------------------- july6,yz
+//-------------------------------------------------- yuting
 int MrsvrMessageServer::feedBackInfoRegist(char* infoRegistTime){
   std::cerr << "registtime: " << infoRegistTime << std::endl;
   igtl::StringMessage::Pointer feedRegistTimeMsg;
@@ -651,7 +615,7 @@ int MrsvrMessageServer::feedBackInfo()
   }  //end "this" if
 
 }
-//-------------------------------------------------- end july6,yz
+//-------------------------------------------------- end, yuting
 
 
 int MrsvrMessageServer::getSvrStatus()
@@ -812,111 +776,61 @@ void MrsvrMessageServer::getRobotStatus(int* mode, int* outrange, int* lock)
 }
 
 
-/*
-string MrsvrMessageServer::rowCoor(int rowAngulated)
-{
-  string row;
-  switch (rowAngulated){
-  case 1:  
-    row = "A"; 
-    break;
-  case 2:
-    row = "B";
-    break;
-  case 3:
-    row = "C";
-    break;
-  case 4:  
-    row = "D";
-    break;
-  case 5:
-    row = "E";
-    break;
-  case 6:
-    row = "F";
-    break;
-  case 7:  
-    row = "G";
-    break;
-  case 8:
-    row = "H";
-    break;
-  case 9:
-    row = "I";
-    break;
-  case 10:  
-    row = "J";
-    break;
-  case 11:
-    row = "K";
-    break;
-  case 12:
-    row = "L";
-    break;
-  case 13:
-    row = "M";
-    break;
-  case 14:
-    row = "N";
-    break;
-  }
+// changed by yuting
+void MrsvrMessageServer::setOldTemplate(){
+  std::cerr << "setOldTemplate()" << std::endl;
 
-  return row;
+  rowCoor[1] = "A";
+  rowCoor[2] = "B";
+  rowCoor[3] = "C";
+  rowCoor[4] = "D";
+  rowCoor[5] = "E";
+  rowCoor[6] = "F";
+  rowCoor[7] = "G";
+  rowCoor[8] = "H";
+  rowCoor[9] = "I";
+  rowCoor[10] = "J";
+  rowCoor[11] = "K";
+  rowCoor[12] = "L";
+  rowCoor[13] = "M";
+  rowCoor[14] = "N";
+
+  colCoor[-7] = "-7";
+  colCoor[-6] = "-6";
+  colCoor[-5] = "-5";
+  colCoor[-4] = "-4";
+  colCoor[-3] = "-3";
+  colCoor[-2] = "-2";
+  colCoor[-1] = "-1";
+  colCoor[0] = "0";
+  colCoor[1] = "1";
+  colCoor[2] = "2";
+  colCoor[3] = "3";
+  colCoor[4] = "4";
+  colCoor[5] = "5";
+  colCoor[6] = "6";
+  colCoor[7] = "7";
 }
 
 
+void MrsvrMessageServer::setNewTemplate(){
+  std::cerr << "setNewTemplate()" << std::endl;
 
-string MrsvrMessageServer::colCoor(int colAngulated)
-{
-  string col;
-  switch (colAngulated){
-  case -7:  
-    col = "-7"; 
-    break;
-  case -6:
-    col = "-6";
-    break;
-  case -5:
-    col = "-5";
-    break;
-  case -4:  
-    col = "-4";
-    break;
-  case -3:
-    col = "-3";
-    break;
-  case -2:
-    col = "-2";
-    break;
-  case -1:  
-    col = "-1";
-    break;
-  case 0:
-    col = "0";
-    break;
-  case 1:
-    col = "1";
-    break;
-  case 2:  
-    col = "2";
-    break;
-  case 3:
-    col = "3";
-    break;
-  case 4:
-    col = "4";
-    break;
-  case 5:
-    col = "5";
-    break;
-  case 6:
-    col = "6";
-    break;
-  case 7:
-    col = "7";
-    break;
-  }
+  rowCoor[1] = "A";
+  rowCoor[2] = "B";
+  rowCoor[3] = "C";
+  rowCoor[4] = "D";
+  rowCoor[5] = "E";
+  rowCoor[6] = "F";
+  rowCoor[7] = "G";
+  rowCoor[8] = "H";
+  rowCoor[9] = "I";
 
-  return col;
+  colCoor[1] = "-3";
+  colCoor[2] = "-2";
+  colCoor[3] = "-1";
+  colCoor[4] = "0";
+  colCoor[5] = "1";
+  colCoor[6] = "2";
+  colCoor[7] = "3";
 }
-*/

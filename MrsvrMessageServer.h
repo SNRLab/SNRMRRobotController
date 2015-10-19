@@ -120,14 +120,12 @@ class MrsvrMessageServer : public MrsvrThread {
   //unsigned char      rcvBuf[MESSAGE_BUFFER_SIZE];
   int                onRcvMsgMaster(igtl::Socket::Pointer& socket, igtl::MessageHeader::Pointer& header);
 
-//-------------------- july9,yz
+//-------------------- yuting
   int                onRcvPointMsg(igtl::Socket::Pointer& socket, igtl::MessageHeader::Pointer& header);
   int                onRcvStringMsgTargetCell(igtl::Socket::Pointer& socket, igtl::MessageHeader::Pointer& header);
   int                onRcvStringMsgSelectPath(igtl::Socket::Pointer& socket, igtl::MessageHeader::Pointer& header);
-//-------------------- end july9,yz
 
 
-//-------------------- Oct02,yz
   float*             determineInsertionLocation(float targetRAS[3], float templatePlane[3], float holeRAS[3], float gapDist);
   float*             determineXYZ(float targetRAS[3], float holeRAS[3], float gapDist);
   float              determineRadius(float gapDist, float degree);
@@ -143,11 +141,8 @@ class MrsvrMessageServer : public MrsvrThread {
   float              degreeAngulated;
   int                rowAngulated;
   int                colAngulated;
- 
-//string             rowCoor(int rowAngulated);
-//string             colCoor(int colAngulated);
 
-//-------------------- end Oct02,yz
+//-------------------- end, yuting
 
 
   bool               fSetTargetMatrix;
@@ -179,8 +174,7 @@ class MrsvrMessageServer : public MrsvrThread {
   igtl::Socket* getSocket() { return this->socket; };
   int         sendCurrentPosition(igtl::Matrix4x4& current);
 
-
-//-------------------------------------------------------------------- july6,yz
+//-------------------------------------------------------------------- july6,yuting
   //void        feedBackStatus(int status);
   int         feedBackInfoRegist(char* infoRegistTime);
   int         feedBackInfoTargetCell(char* cStringPos);
@@ -195,8 +189,12 @@ class MrsvrMessageServer : public MrsvrThread {
   char*       stringTokenPath;
   double      stringPos[3];
   double      stringPath[4];
+
+
+  void               setOldTemplate();
+  void               setNewTemplate();
   
-//-------------------------------------------------------------------- end july6,yz
+//-------------------------------------------------------------------- end july6,yuting
 
  private:
   int         setTargetMatrix(igtl::Matrix4x4& matrix);

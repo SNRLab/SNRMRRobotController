@@ -228,6 +228,9 @@ public:
     ID_CMD_SAVE_DEFAULT,
     ID_CMD_RESET_DEFAULT,
 
+    ID_CMD_OLD_COM,    // changed by yuting
+    ID_CMD_NEW_COM,    // ...
+
     ID_CALIB_LEFT_BTN,
     ID_CALIB_RIGHT_BTN,
     ID_CALIB_ZERO_BTN,
@@ -606,9 +609,9 @@ private:
   void   setCalibrationMatrix(float[16]);
 
 
-  //-------------------------------------------------- july6,ez
+  //-------------------------------------------------- yuting
   void   updateFeedBackInfo();
-  //-------------------------------------------------- end july6,ez
+  //-------------------------------------------------- end, yuting
 
 //----------------------- Public functions -------------------------//
 public:
@@ -644,6 +647,8 @@ public:
 
   long onCmdStartCom(FXObject*, FXSelector, void*);
   long onCmdStopCom(FXObject*, FXSelector, void*);
+  long onCmdOldCom(FXObject*, FXSelector, void*);    // changed by yuting
+  long onCmdNewCom(FXObject*, FXSelector, void*);     // ...
   long onCmdLocServCon(FXObject*, FXSelector, void*);
   long onCmdLocServDiscon(FXObject*, FXSelector, void*);
   long onCmdSaveDefault(FXObject*, FXSelector, void*);

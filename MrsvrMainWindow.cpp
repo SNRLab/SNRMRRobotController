@@ -58,6 +58,11 @@ FXDEFMAP(MrsvrMainWindow) MrsvrMainWindowMap[] = {
   FXMAPFUNC(SEL_COMMAND,  MrsvrMainWindow::ID_CMD_START_COM,   MrsvrMainWindow::onCmdStartCom),
   FXMAPFUNC(SEL_COMMAND,  MrsvrMainWindow::ID_CMD_STOP_COM,    MrsvrMainWindow::onCmdStopCom),
 
+  // changed by yuting
+  FXMAPFUNC(SEL_COMMAND,  MrsvrMainWindow::ID_CMD_OLD_COM,     MrsvrMainWindow::onCmdOldCom),
+  FXMAPFUNC(SEL_COMMAND,  MrsvrMainWindow::ID_CMD_NEW_COM,     MrsvrMainWindow::onCmdNewCom),
+  
+
   FXMAPFUNC(SEL_COMMAND,  MrsvrMainWindow::ID_CMD_SAVE_DEFAULT,MrsvrMainWindow::onCmdSaveDefault),
   FXMAPFUNC(SEL_COMMAND,  MrsvrMainWindow::ID_CMD_RESET_DEFAULT,
                                                                MrsvrMainWindow::onCmdResetDefault),
@@ -386,15 +391,14 @@ int MrsvrMainWindow::buildCommunicationControlPanel(FXComposite* comp)
                   FXDataTarget::ID_VALUE,
                   TEXTFIELD_READONLY|JUSTIFY_CENTER_X|FRAME_SUNKEN, 
                   0, 0, 50, 15);
-
   gpSvr->setBackColor(getApp()->getShadowColor());
+ 
   FXMatrix* mtTcpIp = 
     new FXMatrix(frSvr,2,
                  MATRIX_BY_COLUMNS|LAYOUT_FILL_Y|
                  LAYOUT_FILL_X|LAYOUT_TOP|LAYOUT_LEFT|
                  LAYOUT_FILL_COLUMN|LAYOUT_FILL_ROW);
   mtTcpIp->setBackColor(getApp()->getShadowColor());
-  
   lb = new FXLabel(mtTcpIp, "Port #:");
   lb->setBackColor(getApp()->getShadowColor());
   new FXTextField(mtTcpIp,10,dtConPortNo,
@@ -402,6 +406,22 @@ int MrsvrMainWindow::buildCommunicationControlPanel(FXComposite* comp)
                   TEXTFIELD_INTEGER|JUSTIFY_RIGHT|JUSTIFY_RIGHT|
                   FRAME_SUNKEN, 
                   0, 0, 50, 15);
+
+  // changed by yuting
+  FXMatrix* mtTemplate = 
+    new FXMatrix(frSvr,2,
+		 MATRIX_BY_COLUMNS|LAYOUT_FILL_Y|
+                 LAYOUT_FILL_X|LAYOUT_TOP|LAYOUT_LEFT|
+                 LAYOUT_FILL_COLUMN|LAYOUT_FILL_ROW);
+    mtTemplate->setBackColor(getApp()->getShadowColor());
+    new FXRadioButton(mtTemplate, "Old Template", this,
+		      ID_CMD_OLD_COM,FRAME_RAISED|FRAME_THICK|LAYOUT_CENTER_X|
+		      LAYOUT_CENTER_Y|LAYOUT_FILL_X);
+    new FXRadioButton(mtTemplate, "New Template", this,
+		      ID_CMD_NEW_COM,FRAME_RAISED|FRAME_THICK|LAYOUT_CENTER_X|
+		      LAYOUT_CENTER_Y|LAYOUT_FILL_X);
+  
+
   FXMatrix* mtSvr2 = 
     new FXMatrix(frSvr,2,
                  MATRIX_BY_COLUMNS|LAYOUT_FILL_Y|
@@ -1706,7 +1726,7 @@ void MrsvrMainWindow::updateExternalCommands()
 }
 
 
-//-------------------------------------------------- july6,ez
+//-------------------------------------------------- yuting
 int cTimes = 0;
 int wTimes = 0;
 int eTimes = 0;
@@ -1728,7 +1748,7 @@ void MrsvrMainWindow::updateFeedBackInfo()
       }
     }
 }
-//-------------------------------------------------- end july6,ez
+//-------------------------------------------------- end, yuting
 
 
 void MrsvrMainWindow::setTargetPositionRAS(float pos[3])
@@ -2217,9 +2237,9 @@ long MrsvrMainWindow::onUpdateTimer(FXObject* obj, FXSelector sel,void* ptr)
 
   updateParameters();
   updateExternalCommands();
-  //-------------------------------------------------- july6,ez
+  //-------------------------------------------------- yuting
   updateFeedBackInfo();
-  //-------------------------------------------------- end july6,ez
+  //-------------------------------------------------- end yuting
 
   int currentMode = robotStatus->getMode();
   if (prevMode != currentMode) {
@@ -2650,9 +2670,43 @@ long MrsvrMainWindow::onCmdStopCom(FXObject*, FXSelector, void*)
   consolePrint(1, true, "Stopping Remote Control Server...\n");
 
   if (extMsgSvr) {
-    if (extMsgSvr->getSvrStatus() == MrsvrMessageServer::SVR_WAIT ||
-        extMsgSvr->getSvrStatus() == MrsvrMessageServer::SVR_CONNECTED) {
-      extMsgSvr->stop();
+    if (extMsgSvr->getSvrStatus() == MrsvrMessageServer::SVR_STOP) {
+      extMsgSvr->setPortNo(valConPortNo);
+      extMsgSvr->run();
+      consolePrint(1, true, "Remote Control Started.\n");
+    }
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+
+// changed by yuting
+long MrsvrMainWindow::onCmdOldCom(FXObject*, FXSelector, void*)
+{
+  DBG_MMW_PRINT("onCmdOldCom()\n");
+
+  if (extMsgSvr) {
+    if (extMsgSvr->getSvrStatus() == MrsvrMessageServer::SVR_STOP) {
+      extMsgSvr->setOldTemplate();
+      consolePrint(1, true, "Old template ...\n");
+    }
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+
+long MrsvrMainWindow::onCmdNewCom(FXObject*, FXSelector, void*)
+{
+  DBG_MMW_PRINT("onCmdNewCom()\n");
+
+  if (extMsgSvr) {
+    if (extMsgSvr->getSvrStatus() == MrsvrMessageServer::SVR_STOP) {
+      extMsgSvr->setNewTemplate();
+      consolePrint(1, true, "New template ...\n");
     }
     return 1;
   } else {
